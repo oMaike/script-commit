@@ -28,6 +28,90 @@ Para rodar sem forcar commit, use:
 run_watchdog.cmd
 ```
 
+## Rodar 24/7 em uma VPS
+
+O script nao precisa ficar aberto em loop. O ideal e deixar a VPS ligada 24/7 e chamar o script de hora em hora com `cron`. Como `MIN_HOURS_BETWEEN_COMMITS=16`, ele so cria commit quando o ultimo commit tiver pelo menos 16 horas.
+
+### 1. Instale Git e Go
+
+Em Ubuntu/Debian:
+
+```bash
+sudo apt update
+sudo apt install -y git golang-go
+```
+
+Confira:
+
+```bash
+git --version
+go version
+```
+
+### 2. Clone o repositorio privado
+
+Recomendado com SSH:
+
+```bash
+git clone git@github.com:oMaike/script-commit.git
+cd script-commit
+```
+
+Se a VPS ainda nao tiver chave SSH:
+
+```bash
+ssh-keygen -t ed25519 -C "vps-script-commit"
+cat ~/.ssh/id_ed25519.pub
+```
+
+Adicione a chave publica no GitHub em `Settings > Deploy keys` do repositorio e marque `Allow write access`.
+
+### 3. Configure o autor dos commits
+
+Dentro do repositorio:
+
+```bash
+git config user.name "oMaike Bot"
+git config user.email "oMaike@users.noreply.github.com"
+```
+
+### 4. Teste manualmente com push real
+
+```bash
+MIN_HOURS_BETWEEN_COMMITS=16 \
+HEARTBEAT_FILE=.daily-commit/heartbeat.json \
+TARGET_BRANCH=main \
+FORCE_COMMIT=true \
+SKIP_PUSH=false \
+go run ./scripts/daily_commit.go
+```
+
+Se esse comando criar commit e fizer push, a VPS esta pronta.
+
+### 5. Agende com cron
+
+Abra o cron:
+
+```bash
+crontab -e
+```
+
+Adicione esta linha, trocando `/home/ubuntu/script-commit` pelo caminho real do seu clone:
+
+```cron
+17 * * * * cd /home/ubuntu/script-commit && MIN_HOURS_BETWEEN_COMMITS=16 HEARTBEAT_FILE=.daily-commit/heartbeat.json TARGET_BRANCH=main FORCE_COMMIT=false SKIP_PUSH=false /usr/bin/go run ./scripts/daily_commit.go >> $HOME/daily-commit.log 2>&1
+```
+
+Esse cron roda todo minuto `17` de cada hora. O script decide sozinho se ja esta na hora de commitar.
+
+Para ver os logs:
+
+```bash
+tail -f ~/daily-commit.log
+```
+
+Se o comando `which go` mostrar outro caminho, troque `/usr/bin/go` na linha do cron pelo caminho correto.
+
 ## Configuracao
 
 No arquivo `.github/workflows/daily-commit.yml`, ajuste:
