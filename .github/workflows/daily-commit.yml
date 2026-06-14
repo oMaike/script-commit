@@ -2,9 +2,9 @@ name: Daily commit watchdog
 
 on:
   schedule:
-    # Runs hourly. The script only commits when the latest repo commit is old
-    # enough, so this keeps the gap below 24h without forcing 24 commits/day.
-    - cron: "17 * * * *"
+    # Runs every 15 minutes. The script chooses a deterministic random delay
+    # between commits, caps daily commits, and keeps the gap below 20h.
+    - cron: "*/15 * * * *"
   workflow_dispatch:
     inputs:
       force_commit:
@@ -25,7 +25,15 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      MIN_HOURS_BETWEEN_COMMITS: "23"
+      RANDOM_MIN_MINUTES_BETWEEN_COMMITS: "240"
+      RANDOM_MAX_MINUTES_BETWEEN_COMMITS: "480"
+      BOOST_RANDOM_MIN_MINUTES_BETWEEN_COMMITS: "120"
+      BOOST_RANDOM_MAX_MINUTES_BETWEEN_COMMITS: "360"
+      BOOST_FIXED_DATES: "01-01,04-21,05-01,09-07,10-12,11-02,11-15,11-20,12-25"
+      BOOST_DATES: ""
+      SAFETY_MAX_MINUTES_WITHOUT_COMMIT: "1200"
+      MAX_COMMITS_PER_DAY: "10"
+      COMMIT_DAY_TIMEZONE: "America/Sao_Paulo"
       HEARTBEAT_FILE: ".daily-commit/heartbeat.json"
       SOURCE_TEXT_FILE: "meu roteiro.txt"
       OUTPUT_TEXT_FILE: "roteiro.md"
