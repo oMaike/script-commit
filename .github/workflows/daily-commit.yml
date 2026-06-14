@@ -25,8 +25,11 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      MIN_HOURS_BETWEEN_COMMITS: "16"
+      MIN_HOURS_BETWEEN_COMMITS: "23"
       HEARTBEAT_FILE: ".daily-commit/heartbeat.json"
+      SOURCE_TEXT_FILE: "meu roteiro.txt"
+      OUTPUT_TEXT_FILE: "roteiro.md"
+      WORD_STATE_FILE: ".daily-commit/word-state.json"
       TARGET_BRANCH: ${{ github.ref_name }}
       FORCE_COMMIT: ${{ github.event_name == 'workflow_dispatch' && inputs.force_commit || false }}
 

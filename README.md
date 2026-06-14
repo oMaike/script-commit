@@ -2,7 +2,7 @@
 
 Automacao para manter o repositorio privado com commits frequentes sem deixar passar 24 horas entre um commit e outro.
 
-O workflow roda a cada hora, mas o script Go so cria commit quando o ultimo commit do repositorio ja tem pelo menos `16` horas. Isso evita um commit por hora e ainda deixa uma margem antes das 24 horas.
+O workflow roda a cada hora, mas o script Go so cria commit quando o ultimo commit do repositorio ja tem pelo menos `23` horas. Isso evita um commit por hora e mantem uma palavra por commit diario sem deixar passar 24 horas.
 
 ## Como instalar no repositorio `oMaike/script-commit`
 
@@ -28,9 +28,41 @@ Para rodar sem forcar commit, use:
 run_watchdog.cmd
 ```
 
+## Roteiro palavra por palavra
+
+O script monta o arquivo `roteiro.md` com uma palavra por commit.
+
+Ele usa o arquivo local `meu roteiro.txt` como fonte. A cada execucao valida, o script pega a proxima palavra desse arquivo, acrescenta em `roteiro.md`, atualiza `.daily-commit/word-state.json` e cria um commit.
+
+Arquivos usados:
+
+- `meu roteiro.txt`: texto-fonte local extraido do seu JS.
+- `roteiro.md`: arquivo gerado, uma palavra por vez.
+- `.daily-commit/word-state.json`: indice da proxima palavra.
+
+Para converter novamente um JS no mesmo formato:
+
+```powershell
+$jsPath = "meu roteiro.js"
+$txtPath = "meu roteiro.txt"
+$text = [System.IO.File]::ReadAllText($jsPath, [System.Text.Encoding]::UTF8)
+$startToken = "enviarScript(`"
+$start = $text.IndexOf($startToken) + $startToken.Length
+$end = $text.LastIndexOf("`).then")
+$body = $text.Substring($start, $end - $start).Trim()
+[System.IO.File]::WriteAllText($txtPath, $body, [System.Text.Encoding]::UTF8)
+test_now.cmd
+```
+
+Para reiniciar do zero:
+
+```bash
+rm -f roteiro.md .daily-commit/word-state.json
+```
+
 ## Rodar 24/7 em uma VPS
 
-O script nao precisa ficar aberto em loop. O ideal e deixar a VPS ligada 24/7 e chamar o script de hora em hora com `cron`. Como `MIN_HOURS_BETWEEN_COMMITS=16`, ele so cria commit quando o ultimo commit tiver pelo menos 16 horas.
+O script nao precisa ficar aberto em loop. O ideal e deixar a VPS ligada 24/7 e chamar o script de hora em hora com `cron`. Como `MIN_HOURS_BETWEEN_COMMITS=23`, ele so cria commit quando o ultimo commit tiver pelo menos 23 horas.
 
 ### 1. Instale Git e Go
 
@@ -78,8 +110,11 @@ git config user.email "oMaike@users.noreply.github.com"
 ### 4. Teste manualmente com push real
 
 ```bash
-MIN_HOURS_BETWEEN_COMMITS=16 \
+MIN_HOURS_BETWEEN_COMMITS=23 \
 HEARTBEAT_FILE=.daily-commit/heartbeat.json \
+SOURCE_TEXT_FILE="meu roteiro.txt" \
+OUTPUT_TEXT_FILE=roteiro.md \
+WORD_STATE_FILE=.daily-commit/word-state.json \
 TARGET_BRANCH=main \
 FORCE_COMMIT=true \
 SKIP_PUSH=false \
@@ -99,7 +134,7 @@ crontab -e
 Adicione esta linha, trocando `/home/ubuntu/script-commit` pelo caminho real do seu clone:
 
 ```cron
-17 * * * * cd /home/ubuntu/script-commit && MIN_HOURS_BETWEEN_COMMITS=16 HEARTBEAT_FILE=.daily-commit/heartbeat.json TARGET_BRANCH=main FORCE_COMMIT=false SKIP_PUSH=false /usr/bin/go run ./scripts/daily_commit.go >> $HOME/daily-commit.log 2>&1
+17 * * * * cd /home/ubuntu/script-commit && MIN_HOURS_BETWEEN_COMMITS=23 HEARTBEAT_FILE=.daily-commit/heartbeat.json SOURCE_TEXT_FILE="meu roteiro.txt" OUTPUT_TEXT_FILE=roteiro.md WORD_STATE_FILE=.daily-commit/word-state.json TARGET_BRANCH=main FORCE_COMMIT=false SKIP_PUSH=false /usr/bin/go run ./scripts/daily_commit.go >> $HOME/daily-commit.log 2>&1
 ```
 
 Esse cron roda todo minuto `17` de cada hora. O script decide sozinho se ja esta na hora de commitar.
@@ -116,11 +151,14 @@ Se o comando `which go` mostrar outro caminho, troque `/usr/bin/go` na linha do 
 
 No arquivo `.github/workflows/daily-commit.yml`, ajuste:
 
-- `MIN_HOURS_BETWEEN_COMMITS`: use `16` para boa margem antes de 24h.
+- `MIN_HOURS_BETWEEN_COMMITS`: use `23` para commit diario com margem antes de 24h.
 - `HEARTBEAT_FILE`: arquivo que sera atualizado pelo commit automatico.
+- `SOURCE_TEXT_FILE`: texto-fonte usado para acrescentar uma palavra por commit.
+- `OUTPUT_TEXT_FILE`: arquivo gerado com as palavras, por padrao `roteiro.md`.
+- `WORD_STATE_FILE`: arquivo que guarda o indice da proxima palavra.
 - `cron`: horario/frequencia do watchdog. O valor atual, `17 * * * *`, roda uma vez por hora.
 - `go-version`: versao do Go usada pelo GitHub Actions.
 
 ## Observacao importante
 
-GitHub Actions agenda workflows com boa confiabilidade, mas nao oferece garantia absoluta de execucao no minuto exato. Rodar de hora em hora e commitar depois de 16h reduz bastante o risco de passar de 24h. Para garantia mais rigida, use o mesmo `scripts/daily_commit.go` em um servidor/runner proprio com cron ou systemd timer.
+GitHub Actions agenda workflows com boa confiabilidade, mas nao oferece garantia absoluta de execucao no minuto exato. Rodar de hora em hora e commitar depois de 23h reduz bastante o risco de passar de 24h. Para garantia mais rigida, use o mesmo `scripts/daily_commit.go` em um servidor/runner proprio com cron ou systemd timer.
