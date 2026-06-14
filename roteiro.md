@@ -1,1 +1,1 @@
-﻿SHREK Written by William
+﻿SHREK Written by William Steig
