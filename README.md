@@ -2,7 +2,7 @@
 
 Automacao para manter o repositorio privado com commits frequentes sem deixar passar 24 horas entre um commit e outro.
 
-O workflow roda a cada hora, mas o script Go so cria commit quando o ultimo commit do repositorio ja tem pelo menos `20` horas. Isso evita um commit por hora e ainda deixa uma margem antes das 24 horas.
+O workflow roda a cada hora, mas o script Go so cria commit quando o ultimo commit do repositorio ja tem pelo menos `16` horas. Isso evita um commit por hora e ainda deixa uma margem antes das 24 horas.
 
 ## Como instalar no repositorio `oMaike/script-commit`
 
@@ -32,11 +32,11 @@ run_watchdog.cmd
 
 No arquivo `.github/workflows/daily-commit.yml`, ajuste:
 
-- `MIN_HOURS_BETWEEN_COMMITS`: use `20` para boa margem antes de 24h.
+- `MIN_HOURS_BETWEEN_COMMITS`: use `16` para boa margem antes de 24h.
 - `HEARTBEAT_FILE`: arquivo que sera atualizado pelo commit automatico.
 - `cron`: horario/frequencia do watchdog. O valor atual, `17 * * * *`, roda uma vez por hora.
 - `go-version`: versao do Go usada pelo GitHub Actions.
 
 ## Observacao importante
 
-GitHub Actions agenda workflows com boa confiabilidade, mas nao oferece garantia absoluta de execucao no minuto exato. Rodar de hora em hora e commitar depois de 20h reduz bastante o risco de passar de 24h. Para garantia mais rigida, use o mesmo `scripts/daily_commit.go` em um servidor/runner proprio com cron ou systemd timer.
+GitHub Actions agenda workflows com boa confiabilidade, mas nao oferece garantia absoluta de execucao no minuto exato. Rodar de hora em hora e commitar depois de 16h reduz bastante o risco de passar de 24h. Para garantia mais rigida, use o mesmo `scripts/daily_commit.go` em um servidor/runner proprio com cron ou systemd timer.

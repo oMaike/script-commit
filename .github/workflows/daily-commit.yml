@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      MIN_HOURS_BETWEEN_COMMITS: "20"
+      MIN_HOURS_BETWEEN_COMMITS: "16"
       HEARTBEAT_FILE: ".daily-commit/heartbeat.json"
       TARGET_BRANCH: ${{ github.ref_name }}
       FORCE_COMMIT: ${{ github.event_name == 'workflow_dispatch' && inputs.force_commit || false }}

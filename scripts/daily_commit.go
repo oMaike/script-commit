@@ -27,7 +27,7 @@ func main() {
 }
 
 func run() error {
-	minHours, err := envInt("MIN_HOURS_BETWEEN_COMMITS", 20)
+	minHours, err := envInt("MIN_HOURS_BETWEEN_COMMITS", 16)
 	if err != nil {
 		return err
 	}
