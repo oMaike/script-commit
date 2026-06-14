@@ -1,0 +1,50 @@
+name: Daily commit watchdog
+
+on:
+  schedule:
+    # Runs hourly. The script only commits when the latest repo commit is old
+    # enough, so this keeps the gap below 24h without forcing 24 commits/day.
+    - cron: "17 * * * *"
+  workflow_dispatch:
+    inputs:
+      force_commit:
+        description: "Create a heartbeat commit even if the last commit is recent"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-commit-watchdog
+  cancel-in-progress: false
+
+jobs:
+  heartbeat:
+    runs-on: ubuntu-latest
+
+    env:
+      MIN_HOURS_BETWEEN_COMMITS: "20"
+      HEARTBEAT_FILE: ".daily-commit/heartbeat.json"
+      TARGET_BRANCH: ${{ github.ref_name }}
+      FORCE_COMMIT: ${{ github.event_name == 'workflow_dispatch' && inputs.force_commit || false }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+
+      - name: Configure Git author
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Create commit when needed
+        run: go run ./scripts/daily_commit.go
