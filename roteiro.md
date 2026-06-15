@@ -1,1 +1,1 @@
-﻿SHREK Written by William Steig & Ted Elliott
+﻿SHREK Written by William Steig & Ted Elliott SHREK
