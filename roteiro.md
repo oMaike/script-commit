@@ -1,1 +1,1 @@
-﻿SHREK Written by William Steig & Ted Elliott SHREK Once upon a time there was a
+﻿SHREK Written by William Steig & Ted Elliott SHREK Once upon a time there was a lovely
