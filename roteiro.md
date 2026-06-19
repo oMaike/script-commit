@@ -1,1 +1,1 @@
-﻿SHREK Written by William Steig & Ted Elliott SHREK Once upon a time there was a lovely princess. But she had an enchantment
+﻿SHREK Written by William Steig & Ted Elliott SHREK Once upon a time there was a lovely princess. But she had an enchantment upon
