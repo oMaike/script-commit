@@ -1,10 +1,10 @@
 {
-  "updated_at_utc": "2026-07-24T01:05:39Z",
+  "updated_at_utc": "2026-07-24T07:06:09Z",
   "random_min_minutes_between_commits": 240,
   "random_max_minutes_between_commits": 480,
   "boost_random_min_minutes_between_commits": 120,
   "boost_random_max_minutes_between_commits": 360,
-  "boost_active": false,
+  "boost_active": true,
   "boost_fixed_dates": "01-01,04-21,05-01,09-07,10-12,11-02,11-15,11-20,12-25",
   "boost_dates": "",
   "safety_max_minutes_without_commit": 1200,
